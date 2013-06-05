@@ -1,4 +1,16 @@
 ***********************************************************
+**********| Version 2.5.0.4 - Released 2013-06-05 |********
+***********************************************************
+-- changed depricated methods to new core methods
+-- fixxed bootstrap bug for ratecalculator
+
+***********************************************************
+**********| Version 2.5.0.3 - Released 2013-05-27 |********
+***********************************************************
+- added new option for whitelabeling of payment methods in frontend view
+- disabled rate for b2b
+
+***********************************************************
 **********| Version 2.5.0.3 - Released 2013-05-27 |********
 ***********************************************************
 - added new option for whitelabeling of payment methods in frontend view
