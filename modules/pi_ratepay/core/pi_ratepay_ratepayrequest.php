@@ -541,8 +541,7 @@ class pi_ratepay_RatepayRequest extends oxSuperCfg
                 $item->addAttribute('tax', number_format($voucher->getVatValue(), 2, ".", ""));
             }
         }
-$a=$basket->getTotalDiscount();
-$a;
+
         if ($basket->getTotalDiscount()->getBruttoPrice() > 0) {
             $item = $items->addChild('item', "Discount");
             $item->addAttribute('article-number', "Discount");
