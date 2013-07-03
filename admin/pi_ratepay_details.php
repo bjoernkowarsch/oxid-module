@@ -95,6 +95,13 @@ class pi_ratepay_details extends oxAdminDetails
     private $_utfMode = null;
 
     /**
+     * Quantities of articles. e.g needed for partial shipping
+     *
+     * @var array
+     */
+    protected $_Quantities = array();
+
+    /**
      * Preparing all necessary Data for rendering and executing all calls
      * also: {@inheritdoc}
      *
@@ -123,6 +130,8 @@ class pi_ratepay_details extends oxAdminDetails
      */
     private function _initRatepayDetails(oxOrder $order)
     {
+        $this->_setQuantities();
+
         $this->_paymentMethod = pi_ratepay_util_utilities::getPaymentMethod($this->_getPaymentSid());
 
         $this->pi_ratepay_order_details = 'pi_ratepay_order_details';
@@ -427,8 +436,8 @@ class pi_ratepay_details extends oxAdminDetails
         if ($response && (string) $response->head->processing->result->attributes()->code == '404') {
             $articles = $this->getPreparedOrderArticles();
             foreach ($articles as $article) {
-                if (oxConfig::getParameter($article['arthash']) > 0) {
-                    $quant = oxConfig::getParameter($article['arthash']);
+                if ($this->getQuantity($article['arthash']) > 0) {
+                    $quant = $this->getQuantity($article['arthash']);
                     $artid = $article['artid'];
                     // @todo this can be done better
                     oxDb::getDb()->execute("update $this->pi_ratepay_order_details set shipped=shipped+$quant where order_number='" . $this->_getOrderId() . "' and article_number='$artid'");
@@ -722,8 +731,8 @@ class pi_ratepay_details extends oxAdminDetails
         $articles = $this->getPreparedOrderArticles();
         $total = 0;
         foreach ($articles as $article) {
-            if (oxConfig::getParameter($article['arthash']) > 0) {
-                $total = $total + (oxConfig::getParameter($article['arthash']) * $article['unitprice']);
+            if ($this->getQuantity($article['arthash']) > 0) {
+                $total += $article['unitprice'];
             }
         }
         $shoppingBasket = $content->addChild('shopping-basket');
@@ -751,18 +760,18 @@ class pi_ratepay_details extends oxAdminDetails
      */
     private function setRatepayContentBasketItemsItem($items)
     {
+
         $articles = $this->getPreparedOrderArticles();
         foreach ($articles as $article) {
-            if (oxConfig::getParameter($article['arthash']) > 0) {
-
+            if ($this->getQuantity($article['arthash']) > 0) {
                 $title = $this->removeSpecialChars(html_entity_decode($article['oxtitle']));
                 $item = $items->addCDataChild('item', $title, $this->_isUtfMode());
 
                 $item->addAttribute('article-number', $article['artnum']);
-                $item->addAttribute('quantity', oxConfig::getParameter($article['arthash']));
+                $item->addAttribute('quantity', $article['amount']);
                 $item->addAttribute('unit-price', number_format($article['unitPriceNetto'], 2, ".", ""));
-                $item->addAttribute('total-price', number_format($article['unitPriceNetto'] * oxConfig::getParameter($article['arthash']), 2, ".", ""));
-                $item->addAttribute('tax', number_format(($article['unitprice'] * oxConfig::getParameter($article['arthash'])) - ($article['unitPriceNetto'] * oxConfig::getParameter($article['arthash'])), 2, ".", ""));
+                $item->addAttribute('total-price', number_format($article['unitPriceNetto'] * $this->getQuantity($article['arthash']), 2, ".", ""));
+                $item->addAttribute('tax', number_format(($article['unitprice'] * $this->getQuantity($article['arthash'])) - ($article['unitPriceNetto'] * $this->getQuantity($article['arthash'])), 2, ".", ""));
             }
         }
     }
@@ -1087,6 +1096,40 @@ class pi_ratepay_details extends oxAdminDetails
         $settings->loadByType(pi_ratepay_util_utilities::getPaymentMethod($this->_getPaymentSid()));
 
         return $settings;
+    }
+
+    /**
+     * Get quantities of articles (current basket)
+     * @return array
+     */
+    public function getQuantities() {
+
+        return $this->_Quantities;
+
+    }
+
+    /**
+     * Get quantity of an certain article
+     * @return int
+     */
+    public function getQuantity($arthash) {
+
+        return $this->_Quantities[$arthash];
+
+    }
+
+    /**
+     * Combines and adds saved and transmitted (parameters) articles to call from getQuantity/ies
+     * @return null
+     */
+    private function _setQuantities() {
+
+        $articles = $this->getPreparedOrderArticles();
+
+        foreach($articles as $article) {
+            $this->_Quantities[$article['arthash']] = (oxConfig::getParameter($article['arthash'])) ? oxConfig::getParameter($article['arthash']) : $article['amount'];
+        }
+
     }
 
 }

@@ -33,6 +33,7 @@ $aModule = array(
     'author'       => 'PayIntelligent GmbH',
     'url'          => 'http://www.payintelligent.de/',
     'extend'       => array(
+        'oxorder'           => 'pi_ratepay/core/rp_oxorder',
         'payment'           => 'pi_ratepay/views/pi_ratepay_payment',
         'order'             => 'pi_ratepay/views/pi_ratepay_order',
         'thankyou'          => 'pi_ratepay/views/pi_ratepay_thankyou'
