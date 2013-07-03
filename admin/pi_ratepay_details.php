@@ -732,7 +732,7 @@ class pi_ratepay_details extends oxAdminDetails
         $total = 0;
         foreach ($articles as $article) {
             if ($this->getQuantity($article['arthash']) > 0) {
-                $total += $article['unitprice'];
+                $total += $this->getQuantity($article['arthash']) * $article['unitprice'];
             }
         }
         $shoppingBasket = $content->addChild('shopping-basket');
@@ -768,7 +768,7 @@ class pi_ratepay_details extends oxAdminDetails
                 $item = $items->addCDataChild('item', $title, $this->_isUtfMode());
 
                 $item->addAttribute('article-number', $article['artnum']);
-                $item->addAttribute('quantity', $article['amount']);
+                $item->addAttribute('quantity', $this->getQuantity($article['arthash']));
                 $item->addAttribute('unit-price', number_format($article['unitPriceNetto'], 2, ".", ""));
                 $item->addAttribute('total-price', number_format($article['unitPriceNetto'] * $this->getQuantity($article['arthash']), 2, ".", ""));
                 $item->addAttribute('tax', number_format(($article['unitprice'] * $this->getQuantity($article['arthash'])) - ($article['unitPriceNetto'] * $this->getQuantity($article['arthash'])), 2, ".", ""));
